@@ -1,0 +1,43 @@
+import pandas as pd
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+# Загрузка датасета
+df = pd.read_csv('list-of-airports-in-kazakhstan-hxl-tags-1.csv')
+
+# Выбор признаков
+features = ['latitude_deg', 'longitude_deg', 'elevation_ft']
+X = df[features]
+y = df['score']
+
+# Преобразование категориальных признаков (One-Hot Encoding)
+categorical_features = ['continent', 'iso_country', 'iso_region', 'municipality', 'scheduled_service', 'gps_code', 'iata_code', 'local_code']
+X = pd.get_dummies(X, columns=categorical_features)
+
+# Разделение данных на обучающую и тестовую выборки
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Создание и обучение модели AdaBoostRegressor
+model = AdaBoostRegressor()
+model.fit(X_train, y_train)
+
+# Получение прогнозов на тестовой выборке
+y_pred = model.predict(X_test)
+
+# Оценка качества модели (например, среднеквадратичная ошибка)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Mean Squared Error: {mse}')
+
+# Прогнозирование новых данных
+new_data = pd.DataFrame({
+    'latitude_deg': [45.678],
+    'longitude_deg': [-123.456],
+    'elevation_ft': [1000]
+    # Другие признаки
+})
+
+# Преобразование новых данных
+new_data = pd.get_dummies(new_data, columns=categorical_features)
+prediction = model.predict(new_data)
+print(f'Прогноз: {prediction}')
